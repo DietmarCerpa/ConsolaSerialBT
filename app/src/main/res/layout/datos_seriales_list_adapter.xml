@@ -2,24 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="10dp">
+    android:layout_marginLeft="10dp"
+    android:layout_marginBottom="5dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvEntradaSalida"
         android:text="RECIBIDO O ENVIADO"
-        android:layout_margin="5dp"
         android:textStyle="italic"
-        android:textSize="18sp"/>
+        android:textSize="13sp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvMensaje"
         android:text="MENSAJE RECIBIDO / ENVIADO"
-        android:layout_margin="5dp"
         android:textStyle="bold"
-        android:textSize="15sp"/>
+        android:textSize="13sp"/>
 
 </LinearLayout>

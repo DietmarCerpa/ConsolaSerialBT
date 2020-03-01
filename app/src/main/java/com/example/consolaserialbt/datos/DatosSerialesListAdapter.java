@@ -13,7 +13,9 @@ import com.example.consolaserialbt.R;
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class DatosSerialesListAdapter extends ArrayAdapter<String>
 {
@@ -35,46 +37,26 @@ public class DatosSerialesListAdapter extends ArrayAdapter<String>
         convertView = mLayoutInflater.inflate(mRevisarIdRecurso, null);
         String datos = mDatos.get(posicion);
 
-
         TextView tvEntradaSalida = (TextView) convertView.findViewById(R.id.tvEntradaSalida);
         TextView tvMensaje = (TextView) convertView.findViewById(R.id.tvMensaje);
+        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
 
         if(datos.startsWith("$"))
         {
-            tvEntradaSalida.setText("RECIBIDO: ");
+            tvEntradaSalida.setText("RECIBIDO: " + date);
             tvMensaje.setText(datos.substring(1));
         }
         else if(datos.startsWith("¡"))
         {
-            tvEntradaSalida.setText("SISTEMA: ");
-            tvMensaje.setText("Conectando....");
+            tvEntradaSalida.setText("SISTEMA: " + date);
+            tvMensaje.setText(datos.substring(1));
         }
         else
         {
-            tvEntradaSalida.setText("ENVIADO: ");
+            tvEntradaSalida.setText("ENVIADO: " + date);
             tvMensaje.setText(datos);
         }
         return convertView;
     }
-
-    /*
-
-    public View getView(int posicion, View convertView, ViewGroup parent)
-    {
-        convertView = mLayoutInflater.inflate(mRevisarIdRecurso, null);
-        BluetoothDevice dispositivoBT = mDispositivos.get(posicion);
-
-        if(!dispositivoBT.equals(null))
-        {
-            TextView nombreDispositivo = (TextView) convertView.findViewById(R.id.tvNombreDispositivo);
-            TextView direccionDispositivo = (TextView) convertView.findViewById(R.id.tvDireccionMac);
-
-            if(!nombreDispositivo.equals(null) && !nombreDispositivo.getText().equals("null")) nombreDispositivo.setText("Nombre: " + dispositivoBT.getName());
-            else nombreDispositivo.setText("Nombre: oculto");
-            if(!direccionDispositivo.equals(null) && !direccionDispositivo.getText().equals("null")) direccionDispositivo.setText("MAC: " + dispositivoBT.getAddress());
-
-        }
-        return convertView;
-    }*/
 }
 

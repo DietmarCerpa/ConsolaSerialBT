@@ -38,30 +38,28 @@ public class ServicioBT extends Service
         try
         {
             LocalBroadcastManager.getInstance(this).registerReceiver(mEnviarADatoBT, new IntentFilter("TX_BT"));
-            LocalBroadcastManager.getInstance(this).registerReceiver(mComunicacionServicio, new IntentFilter("CSERVICIO"));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mServicioBT, new IntentFilter("SERVICIO_BT"));
 
             mBluetoothDevice = (BluetoothDevice) intent.getExtras().get("dispositivoBT"); //obtiene el dispositivo del intent convocado
 
             Log.d(TAG, "Servicio iniciado... dispositivo: " + mBluetoothDevice);
 
+            EstadoServicio(this, 0,"Iniciando conexion con: " +  mBluetoothDevice.getAddress());
 
             mServicioConexionBT = new ServicioConexionBT(this);
+
             Log.d(TAG, "comenzando comunicacion..."); //se crea una nueva clase dependiente de ServicioConexionBT.java
 
             mServicioConexionBT.comenzarCliente(mBluetoothDevice);
             Log.d(TAG, "comunicacion establecida");
 
-            //mensajeServicio(this, CONECTADO);
             ESTADO = CONECTADO;
-
             return START_NOT_STICKY;
         }catch (Exception e)
         {
-            //mensajeServicio(this, NO_CONECTADO);
             ESTADO = NO_CONECTADO;
             return super.onStartCommand(intent, flags, startId);
         }
-
     }
 
     @Override
@@ -76,10 +74,21 @@ public class ServicioBT extends Service
     public void onDestroy() {
         Log.d(TAG, "Servicio destruido...");
         try
-        {
-            ESTADO = NO_CONECTADO;
-        }catch (Exception e){}
+        { ESTADO = NO_CONECTADO; }
+        catch (Exception e){}
         stopForeground(true);
+    }
+
+    // (-1) NO CONECTO
+    // (0) INICIANDO CONEXION
+    // (1) CONECTANDO
+    // (2) CONECTADO
+    // (3) DESCONECTAR
+    private static void EstadoServicio(Context context, int caso, String mensaje) {
+        Intent intent = new Intent("ESTADO_SERVICIO");
+        intent.putExtra("caso", caso);
+        intent.putExtra("mensaje", mensaje);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     private BroadcastReceiver mEnviarADatoBT = new BroadcastReceiver() {
@@ -91,33 +100,20 @@ public class ServicioBT extends Service
         }
     };
 
-
-    private static void ConfirmacionConexion(Context context, int caso, String mensaje) {
-        Intent intent = new Intent("BT Conectado");
-        intent.putExtra("caso", caso);
-        intent.putExtra("mensaje", mensaje);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
-
-    private BroadcastReceiver mComunicacionServicio = new BroadcastReceiver() {
+    private BroadcastReceiver mServicioBT = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int mensaje = (int) intent.getExtras().get("mensaje");
+            int caso = (int) intent.getExtras().get("caso");
 
-            switch (mensaje)
+            switch (caso)
             {
                 case 1:
                     mServicioConexionBT.detenerHilos();
-                    break;
-                case 2:
                     LocalBroadcastManager.getInstance(ServicioBT.this).unregisterReceiver(mEnviarADatoBT);
-                    LocalBroadcastManager.getInstance(ServicioBT.this).unregisterReceiver(mComunicacionServicio);
+                    LocalBroadcastManager.getInstance(ServicioBT.this).unregisterReceiver(mServicioBT);
                     stopSelf();
                     break;
             }
         }
     };
-
-
 }

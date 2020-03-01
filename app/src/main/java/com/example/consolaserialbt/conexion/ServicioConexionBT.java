@@ -76,9 +76,9 @@ public class ServicioConexionBT
     }
 
 
-    private static void servicioRecibirDatos(Context context, String mensaje) {
+    private static void RecepcionDatoBT(Context context, String mensaje) {
 
-        Intent intent = new Intent("Recibir por BT");
+        Intent intent = new Intent("RX_BT");
         intent.putExtra("mensaje", mensaje);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -88,8 +88,8 @@ public class ServicioConexionBT
     // (1) CONECTANDO
     // (2) CONECTADO
     // (3) DESCONECTAR
-    private static void ConfirmacionConexion(Context context, int caso, String mensaje) {
-        Intent intent = new Intent("BT Conectado");
+    private static void EstadoServicio(Context context, int caso, String mensaje) {
+        Intent intent = new Intent("ESTADO_SERVICIO");
         intent.putExtra("caso", caso);
         intent.putExtra("mensaje", mensaje);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -123,7 +123,7 @@ public class ServicioConexionBT
                 tmp = mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord("appcebadero",UUID_INSEGURO);
 
                 Log.d(TAG, "socket de comunicacion sin encriptacion aceptado");
-                ConfirmacionConexion(mContext, 1, "Conectando...");
+
             }
             catch(Exception e){}
 
@@ -139,6 +139,7 @@ public class ServicioConexionBT
                 Log.d(TAG, "Hilo_Aceptar: run(): iniciando SOCKET RFCOMM...");
                 mmSocket = mmBluetoothSeverSocket.accept();
                 Log.d(TAG, "Hilo_Aceptar: run(): conexion con RFCOMM ACEPTADA!");
+
             }catch (Exception e)
             {
                 Log.d(TAG, "Hilo_Aceptar: run(): EXCEPCION: " + e.getMessage());
@@ -173,10 +174,7 @@ public class ServicioConexionBT
             mmSocket = mmBTSocket;
             InputStream tmpEntrada = null;
             OutputStream tmpSalida = null;
-//            try
-//            {
-//                mProgressDialog.dismiss();
-//            }catch (Exception e){}
+
             try
             {
                 tmpEntrada = mmSocket.getInputStream();
@@ -197,7 +195,9 @@ public class ServicioConexionBT
                 Thread.sleep(1000);
             }catch (Exception e){ }
 
-            ConfirmacionConexion(mContext, 2, "Conectado");
+            EstadoServicio(mContext, 2, "Conectado.");
+
+            String tramaRecibida = "";
 
             while(true)
             {
@@ -208,11 +208,20 @@ public class ServicioConexionBT
                     bytes = mmEntradaDatos.read(bufferDatos);
 
                     String mensajeRecibido = new String(bufferDatos, 0, bytes);
+
+                    if(!mensajeRecibido.contains(System.getProperty("line.separator"))) tramaRecibida+=mensajeRecibido;
+                    else
+                    {
+                        tramaRecibida += mensajeRecibido.substring(0 , mensajeRecibido.indexOf(System.getProperty("line.separator")) - 1);
+                        RecepcionDatoBT(mContext, tramaRecibida);
+                        tramaRecibida = "";
+                    }
+
+
+
                     Log.d(TAG, "ENTRADA DATOS: "+ mensajeRecibido);
-
-                    servicioRecibirDatos(mContext, "$"+ mensajeRecibido);
-
                 }catch (Exception e) {
+                    EstadoServicio(mContext, 3, "Se ha perdido la comunicacion.");
                     Log.e(TAG,"Error leyendo los datos de entrada. " + e.getMessage());
                     break;
                 }
@@ -298,8 +307,8 @@ public class ServicioConexionBT
             {
                 try
                 {
-                    ConfirmacionConexion(mContext, 3, "");
                     Log.d(TAG, "Hilo_Conectar(): run: fallo al crear el socket, cerrando...");
+                    EstadoServicio(mContext, -1, "No se pudo conectar.");
                     mmSocket.close();
                 }catch (Exception ei)
                 {

@@ -77,9 +77,8 @@ public class MenuEncontrarDispositivos extends AppCompatActivity {
                     if(mBluetoothAdapter.isDiscovering()) mBluetoothAdapter.cancelDiscovery();
 
                     try
-                    {
-                        chequearPermisosBT();
-                    }catch (Exception e){ }
+                    { chequearPermisosBT(); }
+                    catch (Exception e) { }
 
                     mBluetoothAdapter.startDiscovery();
 
@@ -96,11 +95,8 @@ public class MenuEncontrarDispositivos extends AppCompatActivity {
                 mBluetoothAdapter.cancelDiscovery();
                 try
                 {
-                    try
-                    {
-                        unregisterReceiver(mRegistrar_DispositivosBTCercanos);
-                    }
-                    catch (Exception e) {}
+                    try { unregisterReceiver(mRegistrar_DispositivosBTCercanos); }
+                    catch (Exception e) { }
 
                     Intent intent = new Intent(view.getContext(), ServicioBT.class);
                     intent.putExtra("dispositivoBT", mDispositivosBTArray.get(position));
